@@ -97,6 +97,11 @@ public class MainWindow extends javax.swing.JFrame {
         craneOnOffButton.setText("⌅");
         craneOnOffButton.setToolTipText("Magnet on/off");
         craneOnOffButton.setFocusable(false);
+        craneOnOffButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                craneOnOffButtonActionPerformed(evt);
+            }
+        });
 
         craneBackwardButton.setText("↓");
         craneBackwardButton.setToolTipText("Move backward");
@@ -277,7 +282,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_formComponentResized
 
     private void craneRightButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneRightButtonActionPerformed
-        openGlListener.rotateCrane(-1);
+        openGlListener.rotateCrane(-3);
     }//GEN-LAST:event_craneRightButtonActionPerformed
 
     private void cameraClockwiseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cameraClockwiseButtonActionPerformed
@@ -289,15 +294,15 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_cameraAntiClockwiseButtonActionPerformed
 
     private void craneForwardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneForwardButtonActionPerformed
-        openGlListener.moveHook(-1);
+        openGlListener.moveHook(-3);
     }//GEN-LAST:event_craneForwardButtonActionPerformed
 
     private void craneLeftButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneLeftButtonActionPerformed
-        openGlListener.rotateCrane(1);
+        openGlListener.rotateCrane(3);
     }//GEN-LAST:event_craneLeftButtonActionPerformed
 
     private void craneBackwardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneBackwardButtonActionPerformed
-        openGlListener.moveHook(1);
+        openGlListener.moveHook(3);
     }//GEN-LAST:event_craneBackwardButtonActionPerformed
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
@@ -305,26 +310,32 @@ public class MainWindow extends javax.swing.JFrame {
         switch(evt.getKeyCode())
         {
             case KeyEvent.VK_LEFT:
-                openGlListener.rotateCrane(0.5f);
+                openGlListener.rotateCrane(2f);
                 break;
             case KeyEvent.VK_RIGHT:
-                openGlListener.rotateCrane(-0.5f);
+                openGlListener.rotateCrane(-2f);
                 break;
             case KeyEvent.VK_UP:
-                openGlListener.moveHook(-0.5f);
+                openGlListener.moveHook(-2f);
                 break;
             case KeyEvent.VK_DOWN:
-                openGlListener.moveHook(0.5f);
+                openGlListener.moveHook(2f);
                 break;
             case KeyEvent.VK_U:
-                openGlListener.pullHook(2f);
+                openGlListener.pullHook(4f);
                 break;
             case KeyEvent.VK_J:
-                openGlListener.pullHook(-2f);
+                openGlListener.pullHook(-4f);
                 break;
+            case KeyEvent.VK_SPACE:
+                openGlListener.magnet();
         }
         glPanel.display();
     }//GEN-LAST:event_formKeyPressed
+
+    private void craneOnOffButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneOnOffButtonActionPerformed
+        openGlListener.magnet();
+    }//GEN-LAST:event_craneOnOffButtonActionPerformed
 
     /**
      * @param args the command line arguments

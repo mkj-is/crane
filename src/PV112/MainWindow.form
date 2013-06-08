@@ -134,6 +134,9 @@
             <Property name="toolTipText" type="java.lang.String" value="Magnet on/off"/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="craneOnOffButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="craneBackwardButton">
           <Properties>

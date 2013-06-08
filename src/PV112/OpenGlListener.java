@@ -1,7 +1,6 @@
 
 package PV112;
 
-import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
@@ -9,8 +8,8 @@ import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -36,18 +35,29 @@ public class OpenGlListener implements GLEventListener {
     private Texture skyboxTexture;
     
     // status
-    private float craneRotation = 60.0f; // in degrees
+    private float craneRotation = 120.0f; // in degrees
     private float hookDistance = -20.0f; // from -60 to 30
-    private float hookHeight = 0.0f; // -100 to 10
+    private float hookHeight = -100.0f; // -100 to 10
+    private boolean on = false;
+    private int grabbedItems = 0;
     
     // boxes
-    public static final int BOX_COUNT = 10;
-    List<float[]> boxes = new ArrayList<float[]>();
+    public static final int BOX_COUNT = 15;
+    public static final float MAGNET_TOLERANCY = 10.0f;
+    public Set<Box> boxes = new HashSet<Box>();
     
     // change positions
     public void rotateCrane(float amount)
     {
         craneRotation += amount;
+        if(craneRotation < 0.0f)
+        {
+            craneRotation = 360.0f + craneRotation;
+        }
+        if(craneRotation > 360.0f)
+        {
+            craneRotation = craneRotation % 360.0f;
+        }
         
     }
     
@@ -75,6 +85,37 @@ public class OpenGlListener implements GLEventListener {
         {
             hookHeight = -100;
         } 
+    }
+    
+    public void magnet()
+    {
+        if(on == false)
+        {
+            Set<Box> indexes = new HashSet<Box>();
+            for(Box box: boxes)
+            {
+                if(Math.abs(box.rotation - craneRotation) < MAGNET_TOLERANCY
+                        && Math.abs(Math.abs(box.position) - Math.abs(-64.0 + hookDistance)) < MAGNET_TOLERANCY
+                        && hookHeight < -90)
+                {
+                    indexes.add(box);
+                }
+            }
+            boolean success = boxes.removeAll(indexes);
+            grabbedItems = indexes.size();
+            System.out.println("boxes added: " + grabbedItems + success);
+        }
+        else
+        {
+            for(int i = 0; i < grabbedItems; i++)
+            {
+                Box box = new Box((int)(craneRotation - 10.0 + Math.random() * 20.0), (int)(-64.0 + hookDistance - 10.0 + Math.random() * 20.0));
+                boxes.add(box);
+            }
+            System.out.println("boxes released: " + grabbedItems);
+            grabbedItems = 0;
+        }
+        on = !on;
     }
     
     
@@ -124,11 +165,9 @@ public class OpenGlListener implements GLEventListener {
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
         
-        // boxes
+        // init boxes
         for(int i = 0; i <= BOX_COUNT; i++){
-            //float distance = Math.random();
-            float[] position = {(float)(Math.random() * 100.0), (float)(Math.random() * 360.0)};
-            boxes.add(position);
+            boxes.add(new Box());
         }
         
         // redraw scene periodically
@@ -189,6 +228,20 @@ public class OpenGlListener implements GLEventListener {
         craneTexture.bind(gl);
         gl.glCallList(craneBottom);
         
+        // attached box
+        if(on && grabbedItems > 0)
+        {
+            gl.glRotatef(craneRotation, 0, 1, 0);
+            gl.glTranslatef(-64 + hookDistance, 2 + 100 + hookHeight, 0);
+            gl.glDisable(GL2.GL_TEXTURE_2D);
+            glut.glutSolidCube(4);
+            gl.glEnable(GL2.GL_TEXTURE_2D);
+            gl.glTranslatef(64 - hookDistance, -2 - 100 - hookHeight, 0);
+            gl.glRotatef(craneRotation, 0, -1, 0);
+        }
+        
+        // rest of crane
+        
         gl.glRotatef(craneRotation, 0, 1, 0);
         
         gl.glCallList(craneCabin);
@@ -196,8 +249,6 @@ public class OpenGlListener implements GLEventListener {
         
         // hook
         gl.glTranslatef(hookDistance, hookHeight, 0);
-        
-        gl.glCallList(craneHook);
         
         // rope
         gl.glDisable(GL2.GL_TEXTURE_2D);
@@ -211,13 +262,20 @@ public class OpenGlListener implements GLEventListener {
 
         gl.glEnable(GL2.GL_TEXTURE_2D);
         
+        gl.glCallList(craneHook);
+        
         // boxes
-        gl.glLoadIdentity();
-        for(float[] position: boxes)
+        gl.glTranslatef(-hookDistance, -hookHeight, 0);
+        gl.glRotatef(-craneRotation, 0, 1, 0);
+        gl.glPushMatrix();
+        
+        for(Box box: boxes)
         {
-            
-            //gl.glTranslatef(100 + position[0], 0, 0);
+            gl.glRotatef(box.rotation, 0, 1, 0);
+            gl.glTranslatef(box.position, 2, 0);
             drawBox(gl);
+            gl.glPopMatrix();
+            gl.glPushMatrix();
             //System.out.println("draw box");
         }
     }
@@ -249,13 +307,42 @@ public class OpenGlListener implements GLEventListener {
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, spec, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0);
+        
+        spotlight(gl);
     }
     
     private void drawBox(GL2 gl)
     {
         gl.glDisable(GL2.GL_TEXTURE_2D);
-        glut.glutSolidCube(60);
+        glut.glutSolidCube(4);
         gl.glEnable(GL2.GL_TEXTURE_2D);
         
+    }
+    
+    private void spotlight(GL2 gl)
+    {
+        // prepare spotlight
+        float spot_ambient[] =  {0.2f,0.2f,0.2f,1.0f };
+        float spot_diffuse[] =  {0.8f,0.2f,0.2f,1.0f };
+        float spot_specular[] =  {0.8f,0.2f,0.2f,1.0f };
+        // set colors here and do the geometry in draw
+        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT,  spot_ambient,0);
+        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE,  spot_diffuse,0);
+        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, spot_specular,0);
+        gl.glEnable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHT0);
+        
+        // set light position
+      // since ligth follows the model when mousing
+      // spotlight as it moves with the scene
+      float spot_position[] =  {-64.0f,125.0f,0.0f,1.0f};
+      float spot_direction[] = {0.0f,-1.0f,0.0f};
+      float spot_angle = 20.0f;
+      gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION,  spot_position,0);
+      gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPOT_DIRECTION,spot_direction,0);
+      gl.glLightf(GL2.GL_LIGHT1, GL2.GL_SPOT_CUTOFF,(float)spot_angle);
+      // "smoothing" the border of the lightcone
+      // change this for effect
+      gl.glLighti(GL2.GL_LIGHT1, GL2.GL_SPOT_EXPONENT, 10);
     }
 }
