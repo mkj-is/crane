@@ -9,6 +9,8 @@ import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -16,7 +18,7 @@ import javax.media.opengl.glu.GLU;
 
 
 public class OpenGlListener implements GLEventListener {
-
+    
     private GLUT glut = new GLUT();
     private GLU glu = new GLU();
     
@@ -33,10 +35,14 @@ public class OpenGlListener implements GLEventListener {
     private Texture asphaltTexture;
     private Texture skyboxTexture;
     
-    // statusv
+    // status
     private float craneRotation = 60.0f; // in degrees
     private float hookDistance = -20.0f; // from -60 to 30
-    private float hookHeight = 0.0f;
+    private float hookHeight = 0.0f; // -100 to 10
+    
+    // boxes
+    public static final int BOX_COUNT = 10;
+    List<float[]> boxes = new ArrayList<float[]>();
     
     // change positions
     public void rotateCrane(float amount)
@@ -61,13 +67,21 @@ public class OpenGlListener implements GLEventListener {
     public void pullHook(float amount)
     {
         hookHeight += amount;
-        System.out.println(hookHeight);
+        if(hookHeight > 10)
+        {
+            hookHeight = 10;
+        }
+        if(hookHeight < -100)
+        {
+            hookHeight = -100;
+        } 
     }
     
     
     
     @Override
     // metoda volana pri vytvoreni okna OpenGL
+    @SuppressWarnings("empty-statement")
     public void init(GLAutoDrawable glad) {
         GL2 gl = glad.getGL().getGL2();
         
@@ -110,7 +124,14 @@ public class OpenGlListener implements GLEventListener {
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
         
-        // redraw scene
+        // boxes
+        for(int i = 0; i <= BOX_COUNT; i++){
+            //float distance = Math.random();
+            float[] position = {(float)(Math.random() * 100.0), (float)(Math.random() * 360.0)};
+            boxes.add(position);
+        }
+        
+        // redraw scene periodically
         FPSAnimator animator = new FPSAnimator(glad, 30);
         animator.add(glad);
         animator.start();
@@ -148,13 +169,13 @@ public class OpenGlListener implements GLEventListener {
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
         glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
-
-        //gl.glRotatef(360, 0, 1, 0);
         
         // skybox
         gl.glDisable(GL2.GL_DEPTH_TEST);
+        gl.glDepthMask(false);
         skyboxTexture.bind(gl);
         gl.glCallList(skybox);
+        gl.glDepthMask(true);
         gl.glEnable(GL2.GL_DEPTH_TEST);
         
         // lighting
@@ -173,10 +194,32 @@ public class OpenGlListener implements GLEventListener {
         gl.glCallList(craneCabin);
         gl.glCallList(craneConsole);
         
+        // hook
         gl.glTranslatef(hookDistance, hookHeight, 0);
         
         gl.glCallList(craneHook);
+        
+        // rope
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        gl.glLineWidth(2); 
+        gl.glBegin(GL2.GL_LINES);
+        gl.glColor3f(0.0f, 0.0f, 0.0f);
+        gl.glVertex3f(-64, 104.5f, 0);
+        gl.glColor3f(0.0f, 0.0f, 0.0f);
+        gl.glVertex3f(-64, 125.3f - hookHeight, 0);
+        gl.glEnd();
 
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        
+        // boxes
+        gl.glLoadIdentity();
+        for(float[] position: boxes)
+        {
+            
+            //gl.glTranslatef(100 + position[0], 0, 0);
+            drawBox(gl);
+            //System.out.println("draw box");
+        }
     }
     
 
@@ -194,7 +237,8 @@ public class OpenGlListener implements GLEventListener {
     
     private void doLighting( GL2 gl )
     {
-        float[] lightPos = {1000, 600, 1000, 1};
+        //float[] lightPos = {300, 200, 300, 1};
+        float[] lightPos = {0, 250, 0, 1};
         gl.glEnable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_LIGHT0);
         float[] noAmbient ={ 0.1f, 0.1f, 0.1f, 1f }; // low ambient light
@@ -207,4 +251,11 @@ public class OpenGlListener implements GLEventListener {
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0);
     }
     
+    private void drawBox(GL2 gl)
+    {
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        glut.glutSolidCube(60);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        
+    }
 }

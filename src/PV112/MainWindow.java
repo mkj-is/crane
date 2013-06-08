@@ -60,16 +60,25 @@ public class MainWindow extends javax.swing.JFrame {
         cameraAntiClockwiseButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Crane");
+        setState(1);
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
             }
         });
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
+            }
+        });
 
         jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setFocusable(false);
 
         craneRightButton.setText("→");
         craneRightButton.setToolTipText("Rotate right");
+        craneRightButton.setFocusable(false);
         craneRightButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 craneRightButtonActionPerformed(evt);
@@ -78,6 +87,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         craneLeftButton.setText("←");
         craneLeftButton.setToolTipText("Rotate left");
+        craneLeftButton.setFocusable(false);
         craneLeftButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 craneLeftButtonActionPerformed(evt);
@@ -86,9 +96,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         craneOnOffButton.setText("⌅");
         craneOnOffButton.setToolTipText("Magnet on/off");
+        craneOnOffButton.setFocusable(false);
 
         craneBackwardButton.setText("↓");
         craneBackwardButton.setToolTipText("Move backward");
+        craneBackwardButton.setFocusable(false);
         craneBackwardButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 craneBackwardButtonActionPerformed(evt);
@@ -97,6 +109,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         craneForwardButton.setText("↑");
         craneForwardButton.setToolTipText("Move forward");
+        craneForwardButton.setFocusable(false);
         craneForwardButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 craneForwardButtonActionPerformed(evt);
@@ -104,6 +117,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         jLabel1.setText("Crane control");
+        jLabel1.setFocusable(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -144,26 +158,34 @@ public class MainWindow extends javax.swing.JFrame {
         );
 
         jPanel2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel2.setFocusable(false);
 
         cameraRightButton.setText("→");
         cameraRightButton.setToolTipText("Move right");
+        cameraRightButton.setFocusable(false);
 
         cameraLeftButton.setText("←");
         cameraLeftButton.setToolTipText("Move left");
+        cameraLeftButton.setFocusable(false);
 
         jButton9.setText("►");
         jButton9.setToolTipText("Change camera");
+        jButton9.setFocusable(false);
 
         cameraBackwardButton.setText("↓");
         cameraBackwardButton.setToolTipText("Move backward");
+        cameraBackwardButton.setFocusable(false);
 
         cameraForwardButton.setText("↑");
         cameraForwardButton.setToolTipText("Move forward");
+        cameraForwardButton.setFocusable(false);
 
         jLabel2.setText("Camera control");
+        jLabel2.setFocusable(false);
 
         cameraClockwiseButton.setText("⟳");
         cameraClockwiseButton.setToolTipText("Change camera");
+        cameraClockwiseButton.setFocusable(false);
         cameraClockwiseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cameraClockwiseButtonActionPerformed(evt);
@@ -172,6 +194,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         cameraAntiClockwiseButton.setText("⟲");
         cameraAntiClockwiseButton.setToolTipText("");
+        cameraAntiClockwiseButton.setFocusable(false);
         cameraAntiClockwiseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cameraAntiClockwiseButtonActionPerformed(evt);
@@ -276,6 +299,32 @@ public class MainWindow extends javax.swing.JFrame {
     private void craneBackwardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneBackwardButtonActionPerformed
         openGlListener.moveHook(1);
     }//GEN-LAST:event_craneBackwardButtonActionPerformed
+
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
+
+        switch(evt.getKeyCode())
+        {
+            case KeyEvent.VK_LEFT:
+                openGlListener.rotateCrane(0.5f);
+                break;
+            case KeyEvent.VK_RIGHT:
+                openGlListener.rotateCrane(-0.5f);
+                break;
+            case KeyEvent.VK_UP:
+                openGlListener.moveHook(-0.5f);
+                break;
+            case KeyEvent.VK_DOWN:
+                openGlListener.moveHook(0.5f);
+                break;
+            case KeyEvent.VK_U:
+                openGlListener.pullHook(2f);
+                break;
+            case KeyEvent.VK_J:
+                openGlListener.pullHook(-2f);
+                break;
+        }
+        glPanel.display();
+    }//GEN-LAST:event_formKeyPressed
 
     /**
      * @param args the command line arguments

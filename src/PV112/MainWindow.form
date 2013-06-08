@@ -3,6 +3,8 @@
 <Form version="1.3" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="title" type="java.lang.String" value="Crane"/>
+    <Property name="state" type="int" value="1"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -10,6 +12,7 @@
   </SyntheticProperties>
   <Events>
     <EventHandler event="componentResized" listener="java.awt.event.ComponentListener" parameters="java.awt.event.ComponentEvent" handler="formComponentResized"/>
+    <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="formKeyPressed"/>
   </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -56,6 +59,7 @@
             <BevelBorder/>
           </Border>
         </Property>
+        <Property name="focusable" type="boolean" value="false"/>
       </Properties>
 
       <Layout>
@@ -108,6 +112,7 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2192;"/>
             <Property name="toolTipText" type="java.lang.String" value="Rotate right"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="craneRightButtonActionPerformed"/>
@@ -117,6 +122,7 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2190;"/>
             <Property name="toolTipText" type="java.lang.String" value="Rotate left"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="craneLeftButtonActionPerformed"/>
@@ -126,12 +132,14 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2305;"/>
             <Property name="toolTipText" type="java.lang.String" value="Magnet on/off"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="craneBackwardButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2193;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move backward"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="craneBackwardButtonActionPerformed"/>
@@ -141,6 +149,7 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2191;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move forward"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="craneForwardButtonActionPerformed"/>
@@ -149,6 +158,7 @@
         <Component class="javax.swing.JLabel" name="jLabel1">
           <Properties>
             <Property name="text" type="java.lang.String" value="Crane control"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -160,6 +170,7 @@
             <BevelBorder/>
           </Border>
         </Property>
+        <Property name="focusable" type="boolean" value="false"/>
       </Properties>
 
       <Layout>
@@ -223,41 +234,48 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2192;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move right"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="cameraLeftButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2190;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move left"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="jButton9">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x25ba;"/>
             <Property name="toolTipText" type="java.lang.String" value="Change camera"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="cameraBackwardButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2193;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move backward"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="cameraForwardButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x2191;"/>
             <Property name="toolTipText" type="java.lang.String" value="Move forward"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel2">
           <Properties>
             <Property name="text" type="java.lang.String" value="Camera control"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="cameraClockwiseButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x27f3;"/>
             <Property name="toolTipText" type="java.lang.String" value="Change camera"/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cameraClockwiseButtonActionPerformed"/>
@@ -267,6 +285,7 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x27f2;"/>
             <Property name="toolTipText" type="java.lang.String" value=""/>
+            <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cameraAntiClockwiseButtonActionPerformed"/>
