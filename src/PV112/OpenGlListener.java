@@ -46,6 +46,12 @@ public class OpenGlListener implements GLEventListener {
     public static final float MAGNET_TOLERANCY = 10.0f;
     public Set<Box> boxes = new HashSet<Box>();
     
+    // camera
+    // glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
+    public Camera cam = Camera.HOOK_CAM;
+    public float[] freeCamPosition = {-200, 150, 100, 0, 0, 0}; // x, y, z, rx, ry, rz
+    public float[] cabinCamPosition = {0, 0, 0}; // rx, ry, rz
+    
     // change positions
     public void rotateCrane(float amount)
     {
@@ -128,6 +134,7 @@ public class OpenGlListener implements GLEventListener {
         
         //gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
         gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glEnable(GL2.GL_SMOOTH);
         
         // models
         craneBottom = ObjLoader.loadWavefrontObjectAsDisplayList(gl, "/resources/objects/crane_bottom.obj");
@@ -164,6 +171,7 @@ public class OpenGlListener implements GLEventListener {
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
         gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV,GL2.GL_TEXTURE_ENV_MODE,GL2.GL_MODULATE);
         
         // init boxes
         for(int i = 0; i <= BOX_COUNT; i++){
@@ -206,6 +214,8 @@ public class OpenGlListener implements GLEventListener {
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         
         gl.glMatrixMode(GL2.GL_MODELVIEW);
+        
+        // cameras
         gl.glLoadIdentity();
         glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
         
@@ -245,7 +255,12 @@ public class OpenGlListener implements GLEventListener {
         gl.glRotatef(craneRotation, 0, 1, 0);
         
         gl.glCallList(craneCabin);
+        
+        cabinSpotlight(gl);
+        
         gl.glCallList(craneConsole);
+        
+        hookSpotlight(gl);
         
         // hook
         gl.glTranslatef(hookDistance, hookHeight, 0);
@@ -300,15 +315,14 @@ public class OpenGlListener implements GLEventListener {
         gl.glEnable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_LIGHT0);
         float[] noAmbient ={ 0.1f, 0.1f, 0.1f, 1f }; // low ambient light
-        float[] spec = { 1f, 0.6f, 0f, 1f }; // low ambient light
-        float[] diffuse ={ 1f, 1f, 1f, 1f };
+        float[] spec = { 0.5f, 0.1f, 0f, 1f }; // low ambient light
+        float[] diffuse ={ 0.5f, 0.5f, 0.5f, 1f };
         // properties of the light
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, noAmbient, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, spec, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, diffuse, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPos, 0);
         
-        spotlight(gl);
     }
     
     private void drawBox(GL2 gl)
@@ -319,30 +333,44 @@ public class OpenGlListener implements GLEventListener {
         
     }
     
-    private void spotlight(GL2 gl)
+    private void hookSpotlight(GL2 gl)
     {
-        // prepare spotlight
-        float spot_ambient[] =  {0.2f,0.2f,0.2f,1.0f };
-        float spot_diffuse[] =  {0.8f,0.2f,0.2f,1.0f };
-        float spot_specular[] =  {0.8f,0.2f,0.2f,1.0f };
-        // set colors here and do the geometry in draw
+        float spot_ambient[] =  {0.2f,0.1f,0.1f,1.0f };
+        float spot_diffuse[] =  {0.5f,0.1f,0.1f,1.0f };
+        float spot_specular[] =  {1f,0.1f,0.1f,1.0f };
+        
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT,  spot_ambient,0);
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE,  spot_diffuse,0);
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, spot_specular,0);
-        gl.glEnable(GL2.GL_LIGHTING);
-        gl.glEnable(GL2.GL_LIGHT0);
-        
-        // set light position
-      // since ligth follows the model when mousing
-      // spotlight as it moves with the scene
-      float spot_position[] =  {-64.0f,125.0f,0.0f,1.0f};
-      float spot_direction[] = {0.0f,-1.0f,0.0f};
-      float spot_angle = 20.0f;
-      gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION,  spot_position,0);
-      gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPOT_DIRECTION,spot_direction,0);
-      gl.glLightf(GL2.GL_LIGHT1, GL2.GL_SPOT_CUTOFF,(float)spot_angle);
-      // "smoothing" the border of the lightcone
-      // change this for effect
-      gl.glLighti(GL2.GL_LIGHT1, GL2.GL_SPOT_EXPONENT, 10);
+        gl.glEnable(GL2.GL_LIGHT1);
+
+        float spot_position[] =  {-64.0f + hookDistance,125.0f,0.0f,1.0f};
+        float spot_direction[] = {0.0f,-1.0f,0.0f};
+        float spot_angle = 25.0f;
+        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION,  spot_position,0);
+        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPOT_DIRECTION,spot_direction,0);
+        gl.glLightf(GL2.GL_LIGHT1, GL2.GL_SPOT_CUTOFF,(float)spot_angle);
+
+        gl.glLighti(GL2.GL_LIGHT1, GL2.GL_SPOT_EXPONENT, 10);
+    }
+    
+    private void cabinSpotlight(GL2 gl)
+    {
+        float spot_ambient[] =  {0.2f,0.1f,0.1f,1.0f };
+        float spot_diffuse[] =  {0.1f,0.5f,0.1f,1.0f };
+        float spot_specular[] =  {0.1f,1.0f,0.1f,1.0f };
+        gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_AMBIENT,  spot_ambient,0);
+        gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_DIFFUSE,  spot_diffuse,0);
+        gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_SPECULAR, spot_specular,0);
+        gl.glEnable(GL2.GL_LIGHT2);
+
+        float spot_position[] =  {0,160.0f,0.0f,1.0f};
+        float spot_direction[] = {0.0f,-1.0f,0.0f};
+        float spot_angle = 25.0f;
+        gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_POSITION,  spot_position,0);
+        gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_SPOT_DIRECTION,spot_direction,0);
+        gl.glLightf(GL2.GL_LIGHT2, GL2.GL_SPOT_CUTOFF,(float)spot_angle);
+
+        gl.glLighti(GL2.GL_LIGHT2, GL2.GL_SPOT_EXPONENT, 10);
     }
 }
