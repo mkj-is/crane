@@ -118,7 +118,7 @@ public class OpenGlListener implements GLEventListener {
         {
             for(int i = 0; i < grabbedItems; i++)
             {
-                Box box = new Box((int)(craneRotation - 10.0 + Math.random() * 20.0), (int)(-64.0 + hookDistance - 10.0 + Math.random() * 20.0));
+                Box box = new Box((int)(craneRotation - 5.0 + Math.random() * 10.0), (int)(-64.0 + hookDistance - 5.0 + Math.random() * 10.0));
                 boxes.add(box);
             }
             //System.out.println("boxes released: " + grabbedItems);
