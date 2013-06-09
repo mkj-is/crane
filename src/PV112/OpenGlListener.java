@@ -239,14 +239,15 @@ public class OpenGlListener implements GLEventListener {
     
     
     @Override
-    // metoda volana pri vytvoreni okna OpenGL
-    @SuppressWarnings("empty-statement")
     public void init(GLAutoDrawable glad) {
         GL2 gl = glad.getGL().getGL2();
         
-        //gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
+        // gl set up
+        gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
         gl.glEnable(GL2.GL_TEXTURE_2D);
         gl.glEnable(GL2.GL_SMOOTH);
+        gl.glEnable(GL2.GL_CULL_FACE);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         
         // models
         craneBottom = ObjLoader.loadWavefrontObjectAsDisplayList(gl, "/resources/objects/crane_bottom.obj");
@@ -291,14 +292,12 @@ public class OpenGlListener implements GLEventListener {
         }
         
         // redraw scene periodically
-        FPSAnimator animator = new FPSAnimator(glad, 30);
-        animator.add(glad);
+        FPSAnimator animator = new FPSAnimator(glad, 60);
         animator.start();
     }
     
 
     @Override
-    // metoda volana pri zatvoreni okna OpenGL
     public void dispose(GLAutoDrawable glad) {
         GL2 gl = glad.getGL().getGL2();
         
@@ -314,19 +313,36 @@ public class OpenGlListener implements GLEventListener {
     
 
     @Override
-    // metoda volana pri kazdom prekresleni obrazovky 
    public void display(GLAutoDrawable glad) { 
+        
         GL2 gl = glad.getGL().getGL2();
-        
-        //System.out.println("displayed" + frame);
-        //frame++;
-        
-        gl.glEnable(GL2.GL_CULL_FACE);
-        
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        
+        // cameras
+        gl.glLoadIdentity();
+        switch(cam)
+        {
+            case FREE_CAM:
+                glu.gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraPosition.x + cameraRotation.x, cameraPosition.y + cameraRotation.y, cameraPosition.z + cameraRotation.z, 0, 1, 0);
+                break;
+            case HOOK_CAM:
+                Transform3D matrix = new Transform3D();
+                matrix.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
+                Vector3f camPos = new Vector3f(0, 120, -64 + hookDistance + 1);
+                matrix.transform(camPos);
+                glu.gluLookAt(camPos.x, 120, camPos.z, camPos.x, 0, camPos.z, camPos.x, 0, camPos.z);
+                break;
+            default:
+                Transform3D m = new Transform3D();
+                m.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
+                Vector3f pos = new Vector3f(0, 114, -12);
+                m.transform(pos);
+                Vector3f rot = new Vector3f(cameraRotation);
+                m.rotY((craneRotation - 90.0) / 180.0 * Math.PI);
+                m.transform(rot);
+                rot.normalize();
+                glu.gluLookAt(pos.x, 115, pos.z, pos.x + rot.x, 115 + rot.y, pos.z + rot.z, 0, 1, 0);
+        }
         
         // skybox
         gl.glDisable(GL2.GL_DEPTH_TEST);
@@ -398,37 +414,10 @@ public class OpenGlListener implements GLEventListener {
         
         gl.glCallList(craneHook);
         
-        // cameras
-        gl.glLoadIdentity();
-        switch(cam)
-        {
-            case FREE_CAM:
-                glu.gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraPosition.x + cameraRotation.x, cameraPosition.y + cameraRotation.y, cameraPosition.z + cameraRotation.z, 0, 1, 0);
-                break;
-            case HOOK_CAM:
-                Transform3D matrix = new Transform3D();
-                matrix.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
-                Vector3f camPos = new Vector3f(0, 120, -64 + hookDistance + 1);
-                matrix.transform(camPos);
-                glu.gluLookAt(camPos.x, 120, camPos.z, camPos.x, 0, camPos.z, camPos.x, 0, camPos.z);
-                break;
-            default:
-                Transform3D m = new Transform3D();
-                m.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
-                Vector3f pos = new Vector3f(0, 114, -12);
-                m.transform(pos);
-                Vector3f rot = new Vector3f(cameraRotation);
-                m.rotY((craneRotation - 90.0) / 180.0 * Math.PI);
-                m.transform(rot);
-                rot.normalize();
-                glu.gluLookAt(pos.x, 115, pos.z, pos.x + rot.x, 115 + rot.y, pos.z + rot.z, 0, 1, 0);
-                
-        }
     }
     
 
     @Override
-    // metoda volana pri zmene velkosti okna
     public void reshape(GLAutoDrawable glad, int x, int y, int width, int height) {
         GL2 gl = glad.getGL().getGL2();
         gl.glViewport(x, y, width, height);
@@ -437,6 +426,7 @@ public class OpenGlListener implements GLEventListener {
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
         glu.gluPerspective(60, (float)width/height, 1, 5000);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
     
     private void doLighting( GL2 gl )
