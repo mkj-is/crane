@@ -329,6 +329,22 @@ public class MainWindow extends javax.swing.JFrame {
                 break;
             case KeyEvent.VK_SPACE:
                 openGlListener.magnet();
+                break;
+            case KeyEvent.VK_C:
+                openGlListener.changeCamera();
+                break;
+            case KeyEvent.VK_W:
+                openGlListener.moveFreeCamera(0, 0, 5);
+                break;
+            case KeyEvent.VK_S:
+                openGlListener.moveFreeCamera(0, 0, -5);
+                break;
+            case KeyEvent.VK_A:
+                openGlListener.moveFreeCamera(-5, 0, 0);
+                break;
+            case KeyEvent.VK_D:
+                openGlListener.moveFreeCamera(5, 0, 0);
+                break;
         }
         glPanel.display();
     }//GEN-LAST:event_formKeyPressed

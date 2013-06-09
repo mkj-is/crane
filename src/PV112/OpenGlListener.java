@@ -35,7 +35,7 @@ public class OpenGlListener implements GLEventListener {
     private Texture skyboxTexture;
     
     // status
-    private float craneRotation = 120.0f; // in degrees
+    private float craneRotation = 0.0f; // in degrees
     private float hookDistance = -20.0f; // from -60 to 30
     private float hookHeight = -100.0f; // -100 to 10
     private boolean on = false;
@@ -48,7 +48,7 @@ public class OpenGlListener implements GLEventListener {
     
     // camera
     // glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
-    public Camera cam = Camera.HOOK_CAM;
+    public Camera cam = Camera.FREE_CAM;
     public float[] freeCamPosition = {-200, 150, 100, 0, 0, 0}; // x, y, z, rx, ry, rz
     public float[] cabinCamPosition = {0, 0, 0}; // rx, ry, rz
     
@@ -122,6 +122,28 @@ public class OpenGlListener implements GLEventListener {
             grabbedItems = 0;
         }
         on = !on;
+    }
+    
+    public void changeCamera()
+    {
+        switch(cam)
+        {
+            case FREE_CAM:
+                cam = Camera.CABIN_CAM;
+                break;
+            case CABIN_CAM:
+                cam = Camera.HOOK_CAM;
+                break;
+            default:
+                cam = Camera.FREE_CAM;
+        }
+    }
+    
+    public void moveFreeCamera(float x, float y, float z)
+    {
+        freeCamPosition[0] += x;
+        freeCamPosition[1] += y;
+        freeCamPosition[2] += z;
     }
     
     
@@ -215,9 +237,6 @@ public class OpenGlListener implements GLEventListener {
         
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         
-        // cameras
-        gl.glLoadIdentity();
-        glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
         
         // skybox
         gl.glDisable(GL2.GL_DEPTH_TEST);
@@ -237,6 +256,25 @@ public class OpenGlListener implements GLEventListener {
         // crane
         craneTexture.bind(gl);
         gl.glCallList(craneBottom);
+        
+        // boxes
+        //gl.glLoadIdentity();
+        gl.glPushMatrix();
+        
+        for(Box box: boxes)
+        {
+            //gl.glPopMatrix();
+            //gl.glPushMatrix();
+            
+            //gl.glRotatef(craneRotation, 0, 1, 0);
+            gl.glRotatef(box.rotation, 0, 1, 0);
+            gl.glTranslatef(box.position, 2, 0);
+            drawBox(gl);
+            gl.glLoadIdentity();
+            gl.glPopMatrix();
+            gl.glPushMatrix();
+            //System.out.println("draw box");
+        }
         
         // attached box
         if(on && grabbedItems > 0)
@@ -279,20 +317,17 @@ public class OpenGlListener implements GLEventListener {
         
         gl.glCallList(craneHook);
         
-        // boxes
-        gl.glTranslatef(-hookDistance, -hookHeight, 0);
-        gl.glRotatef(-craneRotation, 0, 1, 0);
-        gl.glPushMatrix();
-        
-        for(Box box: boxes)
+        // free camera
+        gl.glLoadIdentity();
+        if(cam == Camera.FREE_CAM)
         {
-            gl.glRotatef(box.rotation, 0, 1, 0);
-            gl.glTranslatef(box.position, 2, 0);
-            drawBox(gl);
-            gl.glPopMatrix();
-            gl.glPushMatrix();
-            //System.out.println("draw box");
+            glu.gluLookAt(freeCamPosition[0], freeCamPosition[1], freeCamPosition[2], 0, 100, 0, 0, 1, 0);
         }
+        if(cam == Camera.HOOK_CAM) {
+            glu.gluLookAt(-64 + hookDistance + 1, 120, 0, -64 + hookDistance + 1, 0, 0, -1, 0, 0);
+        }
+        //gl.glLoadIdentity();
+        
     }
     
 
