@@ -1,6 +1,7 @@
 
 package PV112;
 
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -11,6 +12,8 @@ public class MainWindow extends javax.swing.JFrame {
     private final GLJPanel glPanel;
     private GLProfile profile = GLProfile.get(GLProfile.GL2);
     private OpenGlListener openGlListener = new OpenGlListener();
+    
+    private Point lastPoint;
 
     /**
      * Creates new form MainWindow
@@ -62,14 +65,30 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Crane");
         setState(1);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                formMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                formMouseReleased(evt);
+            }
+        });
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
             }
         });
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseDragged(java.awt.event.MouseEvent evt) {
+                MainWindow.this.mouseDragged(evt);
+            }
+        });
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                formKeyReleased(evt);
             }
         });
 
@@ -334,16 +353,22 @@ public class MainWindow extends javax.swing.JFrame {
                 openGlListener.changeCamera();
                 break;
             case KeyEvent.VK_W:
-                openGlListener.moveFreeCamera(0, 0, 5);
+                openGlListener.camForward();
                 break;
             case KeyEvent.VK_S:
-                openGlListener.moveFreeCamera(0, 0, -5);
+                openGlListener.camBackward();
                 break;
             case KeyEvent.VK_A:
-                openGlListener.moveFreeCamera(-5, 0, 0);
+                openGlListener.camLeft();
                 break;
             case KeyEvent.VK_D:
-                openGlListener.moveFreeCamera(5, 0, 0);
+                openGlListener.camRight();
+                break;
+            case KeyEvent.VK_R:
+                openGlListener.camUp();
+                break;
+            case KeyEvent.VK_F:
+                openGlListener.camDown();
                 break;
         }
         glPanel.display();
@@ -352,6 +377,26 @@ public class MainWindow extends javax.swing.JFrame {
     private void craneOnOffButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneOnOffButtonActionPerformed
         openGlListener.magnet();
     }//GEN-LAST:event_craneOnOffButtonActionPerformed
+
+    private void mouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mouseDragged
+        //Point p = evt.getPoint();
+        //openGlListener.mouseMove((float)p.getX(),(float)p.getY());
+    }//GEN-LAST:event_mouseDragged
+
+    private void formMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMousePressed
+        lastPoint = evt.getPoint();
+    }//GEN-LAST:event_formMousePressed
+
+    private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
+
+    }//GEN-LAST:event_formKeyReleased
+
+    private void formMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseReleased
+        Point p = evt.getPoint();
+        float diffX = lastPoint.x - p.x;
+        float diffY = lastPoint.y - p.y;
+        openGlListener.mouseDown(diffX, diffY);
+    }//GEN-LAST:event_formMouseReleased
 
     /**
      * @param args the command line arguments

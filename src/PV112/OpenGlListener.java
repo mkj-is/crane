@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import javax.media.j3d.Transform3D;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
+import javax.vecmath.Vector3f;
 
 
 public class OpenGlListener implements GLEventListener {
@@ -42,16 +44,17 @@ public class OpenGlListener implements GLEventListener {
     private int grabbedItems = 0;
     
     // boxes
-    public static final int BOX_COUNT = 15;
+    public static final int BOX_COUNT = 20;
     public static final float MAGNET_TOLERANCY = 10.0f;
     public Set<Box> boxes = new HashSet<Box>();
     
     // camera
-    // glu.gluLookAt(-200, 150, 100, 0, 100, 0, 0, 1, 0);
+    public static final float CAMERA_STEP = 10.0f;
     public Camera cam = Camera.FREE_CAM;
-    public float[] freeCamPosition = {-200, 150, 100, 0, 0, 0}; // x, y, z, rx, ry, rz
     public float[] cabinCamPosition = {0, 0, 0}; // rx, ry, rz
-    
+    public Vector3f cameraRotation = new Vector3f(0, 0, 1);
+    public Vector3f cameraPosition = new Vector3f(0, 80, -200);
+     
     // change positions
     public void rotateCrane(float amount)
     {
@@ -109,7 +112,7 @@ public class OpenGlListener implements GLEventListener {
             }
             boolean success = boxes.removeAll(indexes);
             grabbedItems = indexes.size();
-            System.out.println("boxes added: " + grabbedItems + success);
+            //System.out.println("boxes added: " + grabbedItems + success);
         }
         else
         {
@@ -118,7 +121,7 @@ public class OpenGlListener implements GLEventListener {
                 Box box = new Box((int)(craneRotation - 10.0 + Math.random() * 20.0), (int)(-64.0 + hookDistance - 10.0 + Math.random() * 20.0));
                 boxes.add(box);
             }
-            System.out.println("boxes released: " + grabbedItems);
+            //System.out.println("boxes released: " + grabbedItems);
             grabbedItems = 0;
         }
         on = !on;
@@ -139,11 +142,66 @@ public class OpenGlListener implements GLEventListener {
         }
     }
     
-    public void moveFreeCamera(float x, float y, float z)
+    public void camForward()
     {
-        freeCamPosition[0] += x;
-        freeCamPosition[1] += y;
-        freeCamPosition[2] += z;
+        Vector3f direction = new Vector3f(cameraRotation);
+        direction.normalize();
+        direction.scale(CAMERA_STEP);
+        cameraPosition.add(direction);
+    }
+    
+    public void camBackward()
+    {
+        Vector3f direction = new Vector3f(cameraRotation);
+        direction.normalize();
+        direction.negate();
+        direction.scale(CAMERA_STEP);
+        cameraPosition.add(direction);
+    }
+    
+    public void camLeft()
+    {
+        Transform3D matrix = new Transform3D();
+        matrix.rotY(Math.PI / 2.0);
+        Vector3f direction = new Vector3f(cameraRotation);
+        matrix.transform(direction);
+        direction.normalize();
+        direction.scale(CAMERA_STEP);
+        direction.y = 0;
+        cameraPosition.add(direction);
+    }
+    
+    public void camRight()
+    {
+        Transform3D matrix = new Transform3D();
+        matrix.rotY(-Math.PI / 2.0);
+        Vector3f direction = new Vector3f(cameraRotation);
+        matrix.transform(direction);
+        direction.normalize();
+        direction.scale(CAMERA_STEP);
+        direction.y = 0;
+        cameraPosition.add(direction);
+    }
+    
+    public void camUp()
+    {
+        Vector3f up = new Vector3f(0, CAMERA_STEP, 0);
+        cameraPosition.add(up);
+    }
+    
+    public void camDown()
+    {
+        Vector3f down = new Vector3f(0, -CAMERA_STEP, 0);
+        cameraPosition.add(down);
+    }
+    
+    public void mouseDown(float x, float y)
+    {
+        Transform3D matrix = new Transform3D();
+        matrix.rotX(y / 250.0);
+        matrix.transform(cameraRotation);
+        matrix.rotY(-x / 250.0);
+        matrix.transform(cameraRotation);
     }
     
     
@@ -258,22 +316,13 @@ public class OpenGlListener implements GLEventListener {
         gl.glCallList(craneBottom);
         
         // boxes
-        //gl.glLoadIdentity();
-        gl.glPushMatrix();
-        
         for(Box box: boxes)
         {
-            //gl.glPopMatrix();
-            //gl.glPushMatrix();
-            
-            //gl.glRotatef(craneRotation, 0, 1, 0);
             gl.glRotatef(box.rotation, 0, 1, 0);
             gl.glTranslatef(box.position, 2, 0);
             drawBox(gl);
-            gl.glLoadIdentity();
-            gl.glPopMatrix();
-            gl.glPushMatrix();
-            //System.out.println("draw box");
+            gl.glTranslatef(-box.position, -2, 0);
+            gl.glRotatef(-box.rotation, 0, 1, 0);
         }
         
         // attached box
@@ -321,11 +370,16 @@ public class OpenGlListener implements GLEventListener {
         gl.glLoadIdentity();
         if(cam == Camera.FREE_CAM)
         {
-            glu.gluLookAt(freeCamPosition[0], freeCamPosition[1], freeCamPosition[2], 0, 100, 0, 0, 1, 0);
+            glu.gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraPosition.x + cameraRotation.x, cameraPosition.y + cameraRotation.y, cameraPosition.z + cameraRotation.z, 0, 1, 0);
         }
         if(cam == Camera.HOOK_CAM) {
-            glu.gluLookAt(-64 + hookDistance + 1, 120, 0, -64 + hookDistance + 1, 0, 0, -1, 0, 0);
+            //gl.glRotatef(craneRotation, 1, 0, 0);
+            //gl.glTranslatef(0, -64 + hookDistance + 1, 0);
+            glu.gluLookAt(0, 120, 0, -64 + hookDistance, 0, 0, -1, 0, 0);
+            //gl.glTranslatef(0, - (-64 + hookDistance + 1), 0);
+            //gl.glRotatef(-craneRotation, 1, 0, 0);
         }
+        
         //gl.glLoadIdentity();
         
     }
