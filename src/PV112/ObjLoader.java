@@ -44,33 +44,33 @@ public class ObjLoader {
     private boolean init  = true;
 
     public ObjLoader(String inModelPath) {
-        BaseLogging.getInstance().info("LOADING WAVEFRONT OBJECT MODEL "+inModelPath);
+        //BaseLogging.getInstance().info("LOADING WAVEFRONT OBJECT MODEL "+inModelPath);
         OBJModelPath = inModelPath;
         LoadOBJModel(OBJModelPath);
         SetFaceRenderType();
-        BaseLogging.getInstance().info("POLYGON COUNT FOR MODEL="+PolyCount);
-        BaseLogging.getInstance().info("VERTEX COUNT FOR MODEL="+vData.size());
-        BaseLogging.getInstance().info("TEXTURE COORDINATE COUNT FOR MODEL="+vtData.size());
-        BaseLogging.getInstance().info("NORMAL COUNT FOR MODEL="+vnData.size());
+        //BaseLogging.getInstance().info("POLYGON COUNT FOR MODEL="+PolyCount);
+        //BaseLogging.getInstance().info("VERTEX COUNT FOR MODEL="+vData.size());
+        //BaseLogging.getInstance().info("TEXTURE COORDINATE COUNT FOR MODEL="+vtData.size());
+        //BaseLogging.getInstance().info("NORMAL COUNT FOR MODEL="+vnData.size());
     }
 
     private void LoadOBJModel(String ModelPath) {
         try {
             BufferedReader br = null;
             if (ModelPath.endsWith(".zip")) {
-                BaseLogging.getInstance().info("WAVEFRONT MESH IS COMPRESSED! TRY TO EXTRACT FIRST/SINGLE ENTRY!");
+                //BaseLogging.getInstance().info("WAVEFRONT MESH IS COMPRESSED! TRY TO EXTRACT FIRST/SINGLE ENTRY!");
                 ZipInputStream tZipInputStream = new ZipInputStream(new BufferedInputStream((new Object()).getClass().getResourceAsStream(ModelPath)));
                 ZipEntry tZipEntry;
                 tZipEntry = tZipInputStream.getNextEntry();
                 String inZipEntryName = tZipEntry.getName();
                 if (inZipEntryName==null) {
-                    BaseLogging.getInstance().fatalerror("ERROR! ZIP ENTRY IS NULL!");
+                    //BaseLogging.getInstance().fatalerror("ERROR! ZIP ENTRY IS NULL!");
                 }
-                BaseLogging.getInstance().info("EXTRACTING: "+inZipEntryName);
+                //BaseLogging.getInstance().info("EXTRACTING: "+inZipEntryName);
                 if (!tZipEntry.isDirectory()) {
                     br = new BufferedReader(new InputStreamReader(tZipInputStream));
                 } else {
-                    BaseLogging.getInstance().fatalerror("ERROR! ZIP ENTRY IS DIRECTORY! SHOULD BE PLAIN FILE!");
+                    //BaseLogging.getInstance().fatalerror("ERROR! ZIP ENTRY IS DIRECTORY! SHOULD BE PLAIN FILE!");
                 }
             } else {
                 br = new BufferedReader(new InputStreamReader((new Object()).getClass().getResourceAsStream(ModelPath)));
@@ -92,9 +92,9 @@ public class ObjLoader {
                 }
             }
             br.close();
-            BaseLogging.getInstance().info("MODEL "+ModelPath+" SUCCESSFULLY LOADED!");
+            //BaseLogging.getInstance().info("MODEL "+ModelPath+" SUCCESSFULLY LOADED!");
         } catch (IOException e) {
-            BaseLogging.getInstance().fatalerror(e);
+            //BaseLogging.getInstance().fatalerror(e);
         }
     }
 
