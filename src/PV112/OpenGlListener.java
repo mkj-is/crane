@@ -112,7 +112,6 @@ public class OpenGlListener implements GLEventListener {
             }
             boolean success = boxes.removeAll(indexes);
             grabbedItems = indexes.size();
-            //System.out.println("boxes added: " + grabbedItems + success);
         }
         else
         {
@@ -121,7 +120,6 @@ public class OpenGlListener implements GLEventListener {
                 Box box = new Box((int)(craneRotation - 5.0 + Math.random() * 10.0), (int)(-64.0 + hookDistance - 5.0 + Math.random() * 10.0));
                 boxes.add(box);
             }
-            //System.out.println("boxes released: " + grabbedItems);
             grabbedItems = 0;
         }
         on = !on;
@@ -400,22 +398,32 @@ public class OpenGlListener implements GLEventListener {
         
         gl.glCallList(craneHook);
         
-        // free camera
+        // cameras
         gl.glLoadIdentity();
-        if(cam == Camera.FREE_CAM)
+        switch(cam)
         {
-            glu.gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraPosition.x + cameraRotation.x, cameraPosition.y + cameraRotation.y, cameraPosition.z + cameraRotation.z, 0, 1, 0);
+            case FREE_CAM:
+                glu.gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z, cameraPosition.x + cameraRotation.x, cameraPosition.y + cameraRotation.y, cameraPosition.z + cameraRotation.z, 0, 1, 0);
+                break;
+            case HOOK_CAM:
+                Transform3D matrix = new Transform3D();
+                matrix.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
+                Vector3f camPos = new Vector3f(0, 120, -64 + hookDistance + 1);
+                matrix.transform(camPos);
+                glu.gluLookAt(camPos.x, 120, camPos.z, camPos.x, 0, camPos.z, camPos.x, 0, camPos.z);
+                break;
+            default:
+                Transform3D m = new Transform3D();
+                m.rotY((craneRotation + 90.0) / 180.0 * Math.PI);
+                Vector3f pos = new Vector3f(0, 114, -12);
+                m.transform(pos);
+                Vector3f rot = new Vector3f(cameraRotation);
+                m.rotY((craneRotation - 90.0) / 180.0 * Math.PI);
+                m.transform(rot);
+                rot.normalize();
+                glu.gluLookAt(pos.x, 115, pos.z, pos.x + rot.x, 115 + rot.y, pos.z + rot.z, 0, 1, 0);
+                
         }
-        if(cam == Camera.HOOK_CAM) {
-            //gl.glRotatef(craneRotation, 1, 0, 0);
-            //gl.glTranslatef(0, -64 + hookDistance + 1, 0);
-            glu.gluLookAt(0, 120, 0, -64 + hookDistance, 0, 0, -1, 0, 0);
-            //gl.glTranslatef(0, - (-64 + hookDistance + 1), 0);
-            //gl.glRotatef(-craneRotation, 1, 0, 0);
-        }
-        
-        //gl.glLoadIdentity();
-        
     }
     
 
@@ -433,14 +441,13 @@ public class OpenGlListener implements GLEventListener {
     
     private void doLighting( GL2 gl )
     {
-        //float[] lightPos = {300, 200, 300, 1};
         float[] lightPos = {0, 250, 0, 1};
         gl.glEnable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_LIGHT0);
         float[] noAmbient ={ 0.1f, 0.1f, 0.1f, 1f }; // low ambient light
         float[] spec = { 0.5f, 0.1f, 0f, 1f }; // low ambient light
         float[] diffuse ={ 0.5f, 0.5f, 0.5f, 1f };
-        // properties of the light
+
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, noAmbient, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, spec, 0);
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, diffuse, 0);
