@@ -148,6 +148,7 @@ public class OpenGlListener implements GLEventListener {
         direction.normalize();
         direction.scale(CAMERA_STEP);
         cameraPosition.add(direction);
+        checkCamPos();
     }
     
     public void camBackward()
@@ -157,6 +158,7 @@ public class OpenGlListener implements GLEventListener {
         direction.negate();
         direction.scale(CAMERA_STEP);
         cameraPosition.add(direction);
+        checkCamPos();
     }
     
     public void camLeft()
@@ -169,6 +171,7 @@ public class OpenGlListener implements GLEventListener {
         direction.scale(CAMERA_STEP);
         direction.y = 0;
         cameraPosition.add(direction);
+        checkCamPos();
     }
     
     public void camRight()
@@ -181,18 +184,21 @@ public class OpenGlListener implements GLEventListener {
         direction.scale(CAMERA_STEP);
         direction.y = 0;
         cameraPosition.add(direction);
+        checkCamPos();
     }
     
     public void camUp()
     {
         Vector3f up = new Vector3f(0, CAMERA_STEP, 0);
         cameraPosition.add(up);
+        checkCamPos();
     }
     
     public void camDown()
     {
         Vector3f down = new Vector3f(0, -CAMERA_STEP, 0);
         cameraPosition.add(down);
+        checkCamPos();
     }
     
     public void mouseDown(float x, float y)
@@ -202,6 +208,34 @@ public class OpenGlListener implements GLEventListener {
         matrix.transform(cameraRotation);
         matrix.rotY(-x / 250.0);
         matrix.transform(cameraRotation);
+    }
+    
+    public void checkCamPos()
+    {
+        if(cameraPosition.y < 4.5f)
+        {
+            cameraPosition.y = 4.5f;
+        }
+        if(cameraPosition.y > 200f)
+        {
+            cameraPosition.y = 200f;
+        }
+        if(cameraPosition.x > 400f)
+        {
+            cameraPosition.x = 400f;
+        }
+        if(cameraPosition.x < -400f)
+        {
+            cameraPosition.x = -400f;
+        }
+        if(cameraPosition.z > 400f)
+        {
+            cameraPosition.z = 400f;
+        }
+        if(cameraPosition.z < -400f)
+        {
+            cameraPosition.z = -400f;
+        }
     }
     
     
