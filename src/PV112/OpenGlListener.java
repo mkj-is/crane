@@ -111,24 +111,30 @@ public class OpenGlListener implements GLEventListener {
     {
         if(on == false)
         {
-            Set<Box> indexes = new HashSet<Box>();
+            //Box b;
+            //Set<Box> indexes = new HashSet<Box>();
             for(Box box: boxes)
             {
                 if(Math.abs(box.rotation - craneRotation) < MAGNET_TOLERANCY
                         && Math.abs(Math.abs(box.position) - Math.abs(-64.0 + hookDistance)) < MAGNET_TOLERANCY
                         && hookHeight < -90)
                 {
-                    indexes.add(box);
+                    boxes.remove(box);
+                    grabbedItems = 1;
+                    //b = box; //indexes.add(box);
+                    break;
                 }
             }
-            boolean success = boxes.removeAll(indexes);
-            grabbedItems = indexes.size();
+            //boxes.remove(b);
+            //boolean success = boxes.removeAll(indexes);
+            //grabbedItems = 1;
+            //grabbedItems = indexes.size();
         }
         else
         {
             for(int i = 0; i < grabbedItems; i++)
             {
-                Box box = new Box((int)(craneRotation - 5.0 + Math.random() * 10.0), (int)(-64.0 + hookDistance - 5.0 + Math.random() * 10.0));
+                Box box = new Box((int)(craneRotation /*- 5.0 + Math.random() * 10.0*/), (int)(-64.0 + hookDistance /*- 5.0 + Math.random() * 10.0*/));
                 boxes.add(box);
             }
             grabbedItems = 0;
