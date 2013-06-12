@@ -21,8 +21,19 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
         initComponents();
         
-        // vytvori sa viditelny panel na ktorom sa bude zobrazovat nas graficky vystup
-        glPanel = new GLJPanel(new GLCapabilities(profile));
+        GLCapabilities capabilities = new GLCapabilities(profile);
+        capabilities.setHardwareAccelerated(true);
+        capabilities.setDoubleBuffered(true);
+        capabilities.setStencilBits(1);
+        capabilities.setSampleBuffers(true);
+        capabilities.setNumSamples(4);
+        //canvas = new GLCanvas(capabilities);
+        
+        //final GLCapabilities cap = new GLCapabilities(profile);
+        //cap.setSampleBuffers(true);
+        //cap.setNumSamples(4);
+
+        glPanel = new GLJPanel(capabilities);
         
         // tento panel sa umiestni na halvne okno aplikacie
         add(glPanel);
@@ -34,6 +45,7 @@ public class MainWindow extends javax.swing.JFrame {
         // k glPanelu pripojime OpenGLListener, aby sme mohli reagovat na udalosti
         // generovane tymto panelom
         glPanel.addGLEventListener(openGlListener);
+        
     }
 
     /**
@@ -364,11 +376,14 @@ public class MainWindow extends javax.swing.JFrame {
             case KeyEvent.VK_D:
                 openGlListener.camRight();
                 break;
-            case KeyEvent.VK_R:
+            /*case KeyEvent.VK_R:
                 openGlListener.camUp();
                 break;
             case KeyEvent.VK_F:
                 openGlListener.camDown();
+                break;*/
+            case KeyEvent.VK_F:
+                openGlListener.fog = !openGlListener.fog;
                 break;
         }
         glPanel.display();

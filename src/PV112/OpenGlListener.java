@@ -54,7 +54,11 @@ public class OpenGlListener implements GLEventListener {
     public float[] cabinCamPosition = {0, 0, 0}; // rx, ry, rz
     public Vector3f cameraRotation = new Vector3f(0, 0, 1);
     public Vector3f cameraPosition = new Vector3f(0, 80, -200);
-     
+    
+    // fog
+    public boolean fog = true;
+    private float[] fogColor = { 0.5f, 0.5f, 0.5f, 1.0f};
+    
     // change positions
     public void rotateCrane(float amount)
     {
@@ -243,11 +247,22 @@ public class OpenGlListener implements GLEventListener {
         GL2 gl = glad.getGL().getGL2();
         
         // gl set up
-        gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
         gl.glEnable(GL2.GL_TEXTURE_2D);
         gl.glEnable(GL2.GL_SMOOTH);
         gl.glEnable(GL2.GL_CULL_FACE);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
+        
+        gl.glEnable(GL2.GL_MULTISAMPLE);
+        gl.glEnable(GL2.GL_BLEND);
+        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+
+        gl.glHint(GL2.GL_POINT_SMOOTH, GL2.GL_NICEST);
+        gl.glHint(GL2.GL_LINE_SMOOTH, GL2.GL_NICEST);
+        gl.glHint(GL2.GL_POLYGON_SMOOTH, GL2.GL_NICEST);
+        
+        gl.glEnable(GL2.GL_POINT_SMOOTH);
+        gl.glEnable(GL2.GL_LINE_SMOOTH);
+        gl.glEnable(GL2.GL_POLYGON_SMOOTH);
         
         // models
         craneBottom = ObjLoader.loadWavefrontObjectAsDisplayList(gl, "/resources/objects/crane_bottom.obj");
@@ -317,6 +332,22 @@ public class OpenGlListener implements GLEventListener {
         
         GL2 gl = glad.getGL().getGL2();
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+        
+        // fog
+        if(fog)
+        {
+            gl.glFogi(GL2.GL_FOG_MODE, GL2.GL_EXP);
+            gl.glFogfv(GL2.GL_FOG_COLOR, fogColor, 0);
+            gl.glFogf(GL2.GL_FOG_DENSITY, 0.005f);
+            gl.glHint(GL2.GL_FOG_HINT, GL2.GL_NICEST);
+            gl.glFogf(GL2.GL_FOG_START, 1.0f);
+            gl.glFogf(GL2.GL_FOG_END, 5.0f);
+            gl.glEnable(GL2.GL_FOG);
+        }
+        else
+        {
+            gl.glDisable(GL2.GL_FOG);
+        }
         
         // cameras
         gl.glLoadIdentity();
@@ -477,8 +508,8 @@ public class OpenGlListener implements GLEventListener {
     private void cabinSpotlight(GL2 gl)
     {
         float spot_ambient[] =  {0.2f,0.1f,0.1f,1.0f };
-        float spot_diffuse[] =  {0.1f,0.5f,0.1f,1.0f };
-        float spot_specular[] =  {0.1f,1.0f,0.1f,1.0f };
+        float spot_diffuse[] =  {0.6f,0.6f,0.2f,1.0f };
+        float spot_specular[] =  {1.0f,1.0f,0.2f,1.0f };
         gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_AMBIENT,  spot_ambient,0);
         gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_DIFFUSE,  spot_diffuse,0);
         gl.glLightfv(GL2.GL_LIGHT2, GL2.GL_SPECULAR, spot_specular,0);
