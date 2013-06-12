@@ -6,10 +6,13 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.media.j3d.Transform3D;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
@@ -22,6 +25,10 @@ public class OpenGlListener implements GLEventListener {
     
     private GLUT glut = new GLUT();
     private GLU glu = new GLU();
+    
+    // key and mouse buffer
+    public KeyBuffer keyBuffer = new KeyBuffer();
+    public MouseBuffer mouseBuffer = new MouseBuffer();
     
     // models
     private int craneBottom;
@@ -49,7 +56,7 @@ public class OpenGlListener implements GLEventListener {
     public Set<Box> boxes = new HashSet<Box>();
     
     // camera
-    public static final float CAMERA_STEP = 10.0f;
+    public static final float CAMERA_STEP = 2.0f;
     public Camera cam = Camera.FREE_CAM;
     public float[] cabinCamPosition = {0, 0, 0}; // rx, ry, rz
     public Vector3f cameraRotation = new Vector3f(0, 0, 1);
@@ -206,9 +213,9 @@ public class OpenGlListener implements GLEventListener {
     public void mouseDown(float x, float y)
     {
         Transform3D matrix = new Transform3D();
-        matrix.rotX(y / 250.0);
+        matrix.rotX(y / 200.0);
         matrix.transform(cameraRotation);
-        matrix.rotY(-x / 250.0);
+        matrix.rotY(-x / 200.0);
         matrix.transform(cameraRotation);
     }
     
@@ -305,6 +312,60 @@ public class OpenGlListener implements GLEventListener {
         for(int i = 0; i <= BOX_COUNT; i++){
             boxes.add(new Box());
         }
+        
+        // logic loop
+        int period = 50; // repeat every sec.
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                if(keyBuffer.isPressed(KeyEvent.VK_LEFT))
+                {
+                    rotateCrane(0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_RIGHT))
+                {
+                    rotateCrane(-0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_UP))
+                {
+                    moveHook(-0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_DOWN))
+                {
+                    moveHook(0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_U))
+                {
+                    pullHook(0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_J))
+                {
+                    pullHook(-0.5f);
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_W))
+                {
+                    camForward();
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_S))
+                {
+                    camBackward();
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_A))
+                {
+                    camLeft();
+                }
+                if(keyBuffer.isPressed(KeyEvent.VK_D))
+                {
+                    camRight();
+                }
+                int[] point = mouseBuffer.getChange();
+                mouseDown(point[0], point[1]);
+            }
+        }, 100, period);
         
         // redraw scene periodically
         FPSAnimator animator = new FPSAnimator(glad, 60);
@@ -456,7 +517,7 @@ public class OpenGlListener implements GLEventListener {
         
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
-        glu.gluPerspective(60, (float)width/height, 1, 5000);
+        glu.gluPerspective(50, (float)width/height, 1, 5000);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
     

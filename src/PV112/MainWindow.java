@@ -27,23 +27,14 @@ public class MainWindow extends javax.swing.JFrame {
         capabilities.setStencilBits(1);
         capabilities.setSampleBuffers(true);
         capabilities.setNumSamples(4);
-        //canvas = new GLCanvas(capabilities);
-        
-        //final GLCapabilities cap = new GLCapabilities(profile);
-        //cap.setSampleBuffers(true);
-        //cap.setNumSamples(4);
 
         glPanel = new GLJPanel(capabilities);
-        
-        // tento panel sa umiestni na halvne okno aplikacie
+
         add(glPanel);
-        
-        // rozmery glPanela sa nastavia tak, aby sa zhodovali s rozmermi hlavneho okna
+
         glPanel.setSize(getWidth() - getInsets().left - getInsets().right,
                         getHeight() - getInsets().top - getInsets().bottom);
-        
-        // k glPanelu pripojime OpenGLListener, aby sme mohli reagovat na udalosti
-        // generovane tymto panelom
+
         glPanel.addGLEventListener(openGlListener);
         
     }
@@ -306,7 +297,6 @@ public class MainWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    // zmena velkosti okna
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         glPanel.setSize(getWidth() - getInsets().left - getInsets().right,
                         getHeight() - getInsets().top - getInsets().bottom);
@@ -337,56 +327,19 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_craneBackwardButtonActionPerformed
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
-
+        openGlListener.keyBuffer.press(evt.getKeyCode());
         switch(evt.getKeyCode())
         {
-            case KeyEvent.VK_LEFT:
-                openGlListener.rotateCrane(2f);
-                break;
-            case KeyEvent.VK_RIGHT:
-                openGlListener.rotateCrane(-2f);
-                break;
-            case KeyEvent.VK_UP:
-                openGlListener.moveHook(-2f);
-                break;
-            case KeyEvent.VK_DOWN:
-                openGlListener.moveHook(2f);
-                break;
-            case KeyEvent.VK_U:
-                openGlListener.pullHook(4f);
-                break;
-            case KeyEvent.VK_J:
-                openGlListener.pullHook(-4f);
-                break;
             case KeyEvent.VK_SPACE:
                 openGlListener.magnet();
                 break;
             case KeyEvent.VK_C:
                 openGlListener.changeCamera();
                 break;
-            case KeyEvent.VK_W:
-                openGlListener.camForward();
-                break;
-            case KeyEvent.VK_S:
-                openGlListener.camBackward();
-                break;
-            case KeyEvent.VK_A:
-                openGlListener.camLeft();
-                break;
-            case KeyEvent.VK_D:
-                openGlListener.camRight();
-                break;
-            /*case KeyEvent.VK_R:
-                openGlListener.camUp();
-                break;
-            case KeyEvent.VK_F:
-                openGlListener.camDown();
-                break;*/
             case KeyEvent.VK_F:
                 openGlListener.fog = !openGlListener.fog;
                 break;
         }
-        glPanel.display();
     }//GEN-LAST:event_formKeyPressed
 
     private void craneOnOffButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_craneOnOffButtonActionPerformed
@@ -394,23 +347,26 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_craneOnOffButtonActionPerformed
 
     private void mouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mouseDragged
+        openGlListener.mouseBuffer.move(evt.getXOnScreen(), evt.getYOnScreen());
         //Point p = evt.getPoint();
         //openGlListener.mouseMove((float)p.getX(),(float)p.getY());
     }//GEN-LAST:event_mouseDragged
 
     private void formMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMousePressed
-        lastPoint = evt.getPoint();
+        openGlListener.mouseBuffer.press(evt.getXOnScreen(), evt.getYOnScreen());
+        //lastPoint = evt.getPoint();
     }//GEN-LAST:event_formMousePressed
 
     private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
-
+        openGlListener.keyBuffer.release(evt.getKeyCode());
     }//GEN-LAST:event_formKeyReleased
 
     private void formMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseReleased
-        Point p = evt.getPoint();
+        openGlListener.mouseBuffer.release();
+        /*Point p = evt.getPoint();
         float diffX = lastPoint.x - p.x;
         float diffY = lastPoint.y - p.y;
-        openGlListener.mouseDown(diffX, diffY);
+        openGlListener.mouseDown(diffX, diffY);*/
     }//GEN-LAST:event_formMouseReleased
 
     /**
